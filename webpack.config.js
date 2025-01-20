@@ -42,7 +42,7 @@ function buildConfig({
         type,
       },
       assetModuleFilename: "[name][ext]",
-      chunkFormat: "module",
+      chunkFormat: false,
     },
     optimization: {
       minimize: true,
@@ -78,13 +78,13 @@ function buildConfig({
   };
 
   if (outputModule) {
-    config.module = {
-      parser: {
-        javascript: {
-          importMeta: false,
-        },
-      },
-    };
+    // config.module = {
+    //   parser: {
+    //     javascript: {
+    //       importMeta: false,
+    //     },
+    //   },
+    // };
   } else {
     config.externalsType = "commonjs";
   }
