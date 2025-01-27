@@ -17,7 +17,7 @@ class PostBuildPlugin {
     compiler.hooks.done.tap('PostBuildPlugin', () => {
       const dist = path.join(__dirname, 'dist');
       const ORT_JSEP_FILE = 'ort-wasm-simd-threaded.jsep.mjs';
-      const ORT_BUNDLE_FILE = 'ort.bundle.min.mjs';
+      const ORT_BUNDLE_FILE = 'ort.bundle.mjs';
 
       // 1. Remove unnecessary files
       {
@@ -32,28 +32,28 @@ class PostBuildPlugin {
         fs.copyFileSync(src, dest);
       }
 
-      // 3. Replace strings in certain files
-      {
-        const files = ['transformers.js', 'transformers.min.js'];
-        for (const file of files) {
-          const filePath = path.join(dist, file);
-          let content = fs.readFileSync(filePath, 'utf8');
-          content = content.replace(
-            // Replace all instances of `new URL("./", import.meta.url)` with `new URL(import.meta.url)`,
-            // as it causes several issues with build tools and bundlers.
-            // 
-            // See the following issues for more information:
-            // - https://github.com/huggingface/transformers.js/issues/911
-            // - https://github.com/huggingface/transformers.js/issues/984
-            // - https://github.com/huggingface/transformers.js/issues/980
-            // - https://github.com/huggingface/transformers.js/issues/1021
-            // - https://github.com/huggingface/transformers.js/issues/1026
-            new RegExp('new URL\\(["\']\\.\\\/["\'],\\s*import\\.meta\\.url\\)', 'gm'),
-            "new URL(import.meta.url)",
-          );
-          fs.writeFileSync(filePath, content, 'utf8');
-        }
-      }
+      // // 3. Replace strings in certain files
+      // {
+      //   const files = ['transformers.js', 'transformers.min.js'];
+      //   for (const file of files) {
+      //     const filePath = path.join(dist, file);
+      //     let content = fs.readFileSync(filePath, 'utf8');
+      //     content = content.replace(
+      //       // Replace all instances of `new URL("./", import.meta.url)` with `new URL(import.meta.url)`,
+      //       // as it causes several issues with build tools and bundlers.
+      //       // 
+      //       // See the following issues for more information:
+      //       // - https://github.com/huggingface/transformers.js/issues/911
+      //       // - https://github.com/huggingface/transformers.js/issues/984
+      //       // - https://github.com/huggingface/transformers.js/issues/980
+      //       // - https://github.com/huggingface/transformers.js/issues/1021
+      //       // - https://github.com/huggingface/transformers.js/issues/1026
+      //       new RegExp('new URL\\(["\']\\.\\\/["\'],\\s*import\\.meta\\.url\\)', 'gm'),
+      //       "new URL(import.meta.url)",
+      //     );
+      //     fs.writeFileSync(filePath, content, 'utf8');
+      //   }
+      // }
     });
   }
 }
@@ -98,7 +98,7 @@ function buildConfig({
         type,
       },
       assetModuleFilename: "[name][ext]",
-      chunkFormat: "module",
+      chunkFormat: false,
     },
     optimization: {
       minimize: true,
@@ -168,6 +168,7 @@ const NODE_EXTERNAL_MODULES = [
 const WEB_BUILD = buildConfig({
   type: "module",
   plugins: [new PostBuildPlugin()],
+  externalModules: ["onnxruntime-web/.wasm?url"],
 });
 
 // Node-compatible builds
